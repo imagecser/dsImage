@@ -1,0 +1,3 @@
+[submodule "dsimage/stb"]
+	path = dsimage/stb
+	url = https://github.com/nothings/stb
