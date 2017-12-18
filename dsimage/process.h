@@ -1,7 +1,6 @@
 #pragma once
 #include "stb/stb_image.h"
 #include "stb/stb_image_write.h"
-
 class PixImage {
 private:
 	int width;
@@ -74,4 +73,6 @@ public:
 	void bluring(int n);
 
 	void grayscale();
+
+	void sobel();
 };

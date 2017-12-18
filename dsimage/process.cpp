@@ -47,3 +47,43 @@ void PixImage::grayscale() {
 			setPixel(x, y, 0, pix);
 		}
 }
+
+void PixImage::sobel() {
+	grayscale();
+	stbi_image_free(output);
+	create(1);
+	copyOutput(*this);
+	unsigned int sum = 0;
+	unsigned char *sob = new unsigned char[width * height], ave;
+	for(int x = 1; x < width - 1; ++x)
+		for(int y = 1; y < height - 1; ++y) {
+			unsigned int gx = getiPixel(x + 1, y - 1, 0) + 2 * getiPixel(x + 1, y, 0) + getiPixel(x + 1, y + 1, 0) - getiPixel(x - 1, y - 1, 0) - 2 * getiPixel(x - 1, y, 0) - getiPixel(x - 1, y + 1, 0);
+			unsigned int gy = getiPixel(x - 1, y - 1, 0) + 2 * getiPixel(x, y - 1, 0) + getiPixel(x + 1, y - 1, 0) - getiPixel(x - 1, y + 1, 0) - 2 * getiPixel(x, y + 1, 0) - getiPixel(x + 1, y + 1, 0);
+			unsigned char g = sqrt(gx * gx + gy * gy);
+			sob[y * width + x] = g;
+		}
+	for(int i = 1; i < width - 1; ++i) {
+		sob[i] = sob[width + i];
+		sob[(height - 1) * width + i] = sob[(height - 2) * width + i];
+	}
+	for(int i = 1; i < height - 1; ++i) {
+		sob[i * width] = sob[i * width + 1];
+		sob[i * width + width - 1] = sob[i * width + width - 2];
+	}
+	sob[0] = sob[width + 1];
+	sob[width - 1] = sob[width + width - 2];
+	sob[(height - 1) * width] = sob[(height - 2) * width + 1];
+	sob[(height - 1) * width + width - 1] = sob[(height - 2) * width + width - 2];
+	for(int i = 0; i < width * height; ++i)
+		sum += sob[i];
+	ave = sum / (width * height);
+	
+	int scale = 4;
+	unsigned char mean = sqrt(scale * ave);
+	for(int i = 0; i < width * height; ++i) {
+		if(sob[i] < 128)
+			output[i] = 0;
+		else
+			output[i] = 255;
+	}
+}
