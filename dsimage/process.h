@@ -1,32 +1,28 @@
 #pragma once
 #include "stb/stb_image.h"
 #include "stb/stb_image_write.h"
+#include "stb/stb_image_resize.h"
 class PixImage {
 private:
 	int width;
 	int height;
 	int channel;
-	int pchannel;
 	unsigned char* data;
-	unsigned char* output;
+
+	void setPixel(unsigned char* d, const int x, const int y, const int c, const int _width, const int pchannel, const unsigned char pix) {
+		d[y * _width * pchannel + x * pchannel + c] = pix;
+	}
 
 	void setPixel(const int x, const int y, const int c, const unsigned char pix) {
-		output[y * width * pchannel + x * pchannel + c] = pix;
+		data[y * width * channel + x * channel + c] = pix;
 	}
 
-	void setPixel(unsigned char* d, const int x, const int y, const int c, const unsigned char pix) {
-		d[y * width * pchannel + x * pchannel + c] = pix;
+	unsigned char* create(const int _channel) {
+		return new unsigned char[width * height * _channel];
 	}
 
-	bool create(const int _channel) {
-		pchannel = _channel;
-		output = new unsigned char[width * height * pchannel];
-		return output ? true : false;
-	}
-
-	void create(unsigned char* &d, const int _channel) {
-		pchannel = _channel;
-		d = new unsigned char[width * height * channel];
+	unsigned int getPixel(unsigned char* d, const int x, const int y, const int c, int pchannel) {
+		return d[y*width*pchannel + x * pchannel + c];
 	}
 
 public:
@@ -34,12 +30,15 @@ public:
 	PixImage(const char* filename, const int pchannel = 0) {
 		readFile(filename, pchannel);
 	}
-	/*
-	~PixImage() {
-		stbi_image_free(data);
-		if(output)
-			stbi_image_free(output);
-	}*/
+
+	PixImage(const PixImage &src) {
+		width = src.width;
+		height = src.height;
+		channel = src.channel;
+		data = create(channel);
+		for(int i = 0; i < width * height * channel; ++i)
+			data[i] = src.data[i];
+	}
 
 	int getWidth() {
 		return width;
@@ -53,8 +52,13 @@ public:
 		return channel;
 	}
 
-	int getPchannel() {
-		return pchannel;
+	void resize(int _width, int _height) {
+		unsigned char* output = new unsigned char[_width * _height * channel];
+		stbir_resize_uint8(data, width, height, 0, output, _width, _height, 0, 3);
+		width = _width;
+		height = _height;
+		stbi_image_free(data);
+		data = output;
 	}
 
 	bool readFile(const char* filename, const int pchannel = 0) {
@@ -63,33 +67,24 @@ public:
 	}
 
 	void writeFile(const char* filename) {
-		if(output)
-			stbi_write_jpg(filename, width, height, pchannel, output, 100);
-		else
-			stbi_write_jpg(filename, width, height, channel, data, 100);
+		stbi_write_jpg(filename, width, height, channel, data, 70);
 	}
 
-	unsigned int getiPixel(const int x, const int y, const int c) {
-		return data[y * width *channel + x * channel + c];
+	unsigned int getPixel(const int x, const int y, const int c) {
+		return data[y*width*channel + x * channel + c];
 	}
 
-	unsigned int getPixel(unsigned char* d, const int x, const int y, const int c) {
-		return d[y*width*channel + x * channel + c];
+	unsigned int getIndex(const int i) {
+		return data[i];
 	}
-
-	unsigned int getoIndex(const int i) {
-		return output[i];
-	}
-
-	unsigned int getIndex(unsigned char* d, const int i) {
-		return d[i];
-	}
-
-	void copyOutput(PixImage src);
-
-	void bluring(int n);
 
 	void grayscale();
 
+	void grayChannel();
+
+	void bluring(int n);
+
 	void sobel();
+
+	void combineHorizontal(PixImage* src[], int size);
 };

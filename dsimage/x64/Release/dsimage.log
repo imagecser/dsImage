@@ -1,0 +1,8 @@
+﻿  main.cpp
+  process.cpp
+process.cpp(54): warning C4244: “初始化”: 从“double”转换到“unsigned char”，可能丢失数据
+process.cpp(74): warning C4244: “初始化”: 从“double”转换到“unsigned char”，可能丢失数据
+  正在生成代码
+  All 180 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  已完成代码的生成
+  dsimage.vcxproj -> D:\_work\dsImage\x64\Release\dsimage.exe

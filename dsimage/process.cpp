@@ -1,28 +1,17 @@
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
+#define STB_IMAGE_RESIZE_IMPLEMENTATION
 #define _CRT_SECURE_NO_WARNINGS
 #include "process.h"
 
-
-void PixImage::copyOutput(PixImage src) {
-	if(data)
-		stbi_image_free(data);
-	width = src.getWidth();
-	height = src.getHeight();
-	channel = src.getPchannel();
-	data = new unsigned char[width * height  * channel];
-	for(int i = 0; i < width * height * channel; ++i)
-		data[i] = src.getoIndex(i);
-}
-
 void PixImage::bluring(int n) {
-	if(output)
-		stbi_image_free(output);
 	if(n % 2 == 0)
 		n++;
-	create(output, channel);
-	for(int x = 0; x < width; ++x)
-		for(int y = 0; y < height; ++y) {
+	int pchannel = channel;
+	unsigned char* output = create(pchannel);
+
+	for(int y = 0; y < height; ++y)
+		for(int x = 0; x < width; ++x) {
 			for(int c = 0; c < channel; ++c) {
 				unsigned char ave;
 				unsigned int sum = 0;
@@ -33,33 +22,44 @@ void PixImage::bluring(int n) {
 				int num = (xend - xstart) * (yend - ystart);
 				for(int i = xstart; i < xend; ++i)
 					for(int j = ystart; j < yend; ++j)
-						sum += getiPixel(i, j, c);
+						sum += getPixel(data, i, j, c, channel);
 				ave = sum / num;
-				setPixel(x, y, c, ave);
+				setPixel(output, x, y, c, width, pchannel, ave);
 			}
 		}
+	stbi_image_free(data);
+	data = output;
 }
 
 void PixImage::grayscale() {
-	if(output)
-		stbi_image_free(output);
-	create(1);
+	unsigned char* output = create(1);
 	for(int x = 0; x < width; ++x)
 		for(int y = 0; y < height; ++y) {
-			unsigned char pix = (getiPixel(x, y, 0) * 76 + getiPixel(x, y, 1) * 150 + getiPixel(x, y, 2) * 30) >> 8;
-			setPixel(x, y, 0, pix);
+			unsigned char pix = (getPixel(x, y, 0) * 76 + getPixel(x, y, 1) * 150 + getPixel(x, y, 2) * 30) >> 8;
+			setPixel(output, x, y, 0, width, 1, pix);
 		}
+	stbi_image_free(data);
+	data = output;
+	channel = 1;
+}
+
+void PixImage::grayChannel() {
+	unsigned char* output = create(3);
+	for(int i = 0; i < width * height; ++i)
+		output[i * 3 + 0] = output[i * 3 + 1] = output[i * 3 + 2] = data[i];
+	stbi_image_free(data);
+	data = output;
+	channel = 3;
 }
 
 void PixImage::sobel() {
 	grayscale();
-	copyOutput(*this);
 	unsigned int sum = 0;
 	unsigned char *sob = new unsigned char[width * height], ave;
-	for(int x = 1; x < width - 1; ++x)
-		for(int y = 1; y < height - 1; ++y) {
-			unsigned int gx = getiPixel(x + 1, y - 1, 0) + 2 * getiPixel(x + 1, y, 0) + getiPixel(x + 1, y + 1, 0) - getiPixel(x - 1, y - 1, 0) - 2 * getiPixel(x - 1, y, 0) - getiPixel(x - 1, y + 1, 0);
-			unsigned int gy = getiPixel(x - 1, y - 1, 0) + 2 * getiPixel(x, y - 1, 0) + getiPixel(x + 1, y - 1, 0) - getiPixel(x - 1, y + 1, 0) - 2 * getiPixel(x, y + 1, 0) - getiPixel(x + 1, y + 1, 0);
+	for(int y = 1; y < height - 1; ++y)
+		for(int x = 1; x < width - 1; ++x) {
+			unsigned int gx = getPixel(x + 1, y - 1, 0) + 2 * getPixel(x + 1, y, 0) + getPixel(x + 1, y + 1, 0) - getPixel(x - 1, y - 1, 0) - 2 * getPixel(x - 1, y, 0) - getPixel(x - 1, y + 1, 0);
+			unsigned int gy = getPixel(x - 1, y - 1, 0) + 2 * getPixel(x, y - 1, 0) + getPixel(x + 1, y - 1, 0) - getPixel(x - 1, y + 1, 0) - 2 * getPixel(x, y + 1, 0) - getPixel(x + 1, y + 1, 0);
 			unsigned char g = sqrt(gx * gx + gy * gy);
 			sob[y * width + x] = g;
 		}
@@ -78,13 +78,44 @@ void PixImage::sobel() {
 	for(int i = 0; i < width * height; ++i)
 		sum += sob[i];
 	ave = sum / (width * height);
-	
-	int scale = 3;
+
+	int scale = 64;
 	unsigned char mean = sqrt(scale * ave);
 	for(int i = 0; i < width * height; ++i) {
 		if(sob[i] < mean)
-			output[i] = 0;
+			sob[i] = 0;
 		else
-			output[i] = 255;
+			sob[i] = 255;
 	}
+	stbi_image_free(data);
+	data = sob;
+}
+
+
+void PixImage::combineHorizontal(PixImage* src[], int size) {
+	int _width = width;
+	for(int i = 0; i < size; ++i) {
+		if(src[i]->getHeight() != height)
+			src[i]->resize(src[i]->getWidth() * height / src[i]->getHeight(), height);
+		if(src[i]->getChannel() == 1)
+			src[i]->grayChannel();
+		_width += src[i]->getWidth();
+	}
+	unsigned char* output = new unsigned char[_width*height*channel];
+	for(int y = 0; y < height; ++y) {
+		int offset = width;
+		for(int x = 0; x < width; ++x)
+			for(int c = 0; c < 3; ++c)
+				setPixel(output, x, y, c, _width, 3, getPixel(x, y, c));
+		for(int i = 0; i < size; ++i) {
+			for(int x = 0; x < src[i]->getWidth(); ++x)
+				for(int c = 0; c < 3; ++c)
+					setPixel(output, offset + x, y, c, _width, 3, src[i]->getPixel(x, y, c));
+			offset += src[i]->getWidth();
+		}
+	}
+	stbi_image_free(data);
+	data = output;
+	width = _width;
+	resize(width / 2, height / 2);
 }
