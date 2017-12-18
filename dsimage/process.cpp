@@ -7,9 +7,12 @@
 void PixImage::copyOutput(PixImage src) {
 	if(data)
 		stbi_image_free(data);
-	data = new unsigned char[src.getWidth() * src.getHeight() * src.getPchannel()];
-	for(int i = 0; i < src.getWidth() * src.getPchannel() * src.getHeight(); ++i)
-		data[i] = getoIndex(i);
+	width = src.getWidth();
+	height = src.getHeight();
+	channel = src.getPchannel();
+	data = new unsigned char[width * height  * channel];
+	for(int i = 0; i < width * height * channel; ++i)
+		data[i] = src.getoIndex(i);
 }
 
 void PixImage::bluring(int n) {
@@ -17,7 +20,7 @@ void PixImage::bluring(int n) {
 		stbi_image_free(output);
 	if(n % 2 == 0)
 		n++;
-	create(channel);
+	create(output, channel);
 	for(int x = 0; x < width; ++x)
 		for(int y = 0; y < height; ++y) {
 			for(int c = 0; c < channel; ++c) {
@@ -50,8 +53,6 @@ void PixImage::grayscale() {
 
 void PixImage::sobel() {
 	grayscale();
-	stbi_image_free(output);
-	create(1);
 	copyOutput(*this);
 	unsigned int sum = 0;
 	unsigned char *sob = new unsigned char[width * height], ave;
@@ -78,10 +79,10 @@ void PixImage::sobel() {
 		sum += sob[i];
 	ave = sum / (width * height);
 	
-	int scale = 4;
+	int scale = 3;
 	unsigned char mean = sqrt(scale * ave);
 	for(int i = 0; i < width * height; ++i) {
-		if(sob[i] < 128)
+		if(sob[i] < mean)
 			output[i] = 0;
 		else
 			output[i] = 255;

@@ -14,10 +14,19 @@ private:
 		output[y * width * pchannel + x * pchannel + c] = pix;
 	}
 
+	void setPixel(unsigned char* d, const int x, const int y, const int c, const unsigned char pix) {
+		d[y * width * pchannel + x * pchannel + c] = pix;
+	}
+
 	bool create(const int _channel) {
 		pchannel = _channel;
 		output = new unsigned char[width * height * pchannel];
 		return output ? true : false;
+	}
+
+	void create(unsigned char* &d, const int _channel) {
+		pchannel = _channel;
+		d = new unsigned char[width * height * channel];
 	}
 
 public:
@@ -25,11 +34,12 @@ public:
 	PixImage(const char* filename, const int pchannel = 0) {
 		readFile(filename, pchannel);
 	}
+	/*
 	~PixImage() {
 		stbi_image_free(data);
 		if(output)
 			stbi_image_free(output);
-	}
+	}*/
 
 	int getWidth() {
 		return width;
@@ -59,13 +69,20 @@ public:
 			stbi_write_jpg(filename, width, height, channel, data, 100);
 	}
 
-
 	unsigned int getiPixel(const int x, const int y, const int c) {
 		return data[y * width *channel + x * channel + c];
 	}
 
+	unsigned int getPixel(unsigned char* d, const int x, const int y, const int c) {
+		return d[y*width*channel + x * channel + c];
+	}
+
 	unsigned int getoIndex(const int i) {
 		return output[i];
+	}
+
+	unsigned int getIndex(unsigned char* d, const int i) {
+		return d[i];
 	}
 
 	void copyOutput(PixImage src);
