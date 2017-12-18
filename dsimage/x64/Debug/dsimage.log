@@ -1,6 +1,9 @@
 ﻿  main.cpp
   正在生成代码...
-  正在跳过...(未检测到相关更改)
+  正在编译...
   process.cpp
+d:\_work\dsimage\dsimage\process.cpp(63): warning C4244: “初始化”: 从“double”转换到“unsigned char”，可能丢失数据
+d:\_work\dsimage\dsimage\process.cpp(83): warning C4244: “初始化”: 从“double”转换到“unsigned char”，可能丢失数据
+  正在生成代码...
   dsimage.vcxproj -> D:\_work\dsImage\x64\Debug\dsimage.exe
   dsimage.vcxproj -> D:\_work\dsImage\x64\Debug\dsimage.pdb (Partial PDB)

@@ -1,4 +1,6 @@
 #pragma once
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
 #include "stb/stb_image.h"
 #include "stb/stb_image_write.h"
 #include "stb/stb_image_resize.h"
@@ -31,13 +33,8 @@ public:
 		readFile(filename, pchannel);
 	}
 
-	PixImage(const PixImage &src) {
-		width = src.width;
-		height = src.height;
-		channel = src.channel;
-		data = create(channel);
-		for(int i = 0; i < width * height * channel; ++i)
-			data[i] = src.data[i];
+	PixImage(PixImage &src) {
+		copy(src);
 	}
 
 	int getWidth() {
@@ -62,12 +59,23 @@ public:
 	}
 
 	bool readFile(const char* filename, const int pchannel = 0) {
+		if(data)
+			stbi_image_free(data);
 		data = stbi_load(filename, &width, &height, &channel, pchannel);
 		return data ? true : false;
 	}
 
 	void writeFile(const char* filename) {
 		stbi_write_jpg(filename, width, height, channel, data, 70);
+	}
+
+	void copy(PixImage& src) {
+		width = src.width;
+		height = src.height;
+		channel = src.channel;
+		data = create(channel);
+		for(int i = 0; i < width * height * channel; ++i)
+			data[i] = src.data[i];
 	}
 
 	unsigned int getPixel(const int x, const int y, const int c) {
@@ -87,4 +95,9 @@ public:
 	void sobel();
 
 	void combineHorizontal(PixImage* src[], int size);
+
+	void clear() {
+		if(data)
+			stbi_image_free(data);
+	}
 };
