@@ -7,14 +7,15 @@ import threading
 import queue
 import os
 import time
+import pybloom
 
 
 count = sum([len(x) for _, _, x in os.walk(os.path.dirname("file/"))])
 MAX_SIZE = 15000
 INIT_URL = "http://www.mm4000.com/"
 lock_count = threading.Lock()
-pageset = set()
-imgset = set()
+pageset = pybloom.BloomFilter(100000)
+imgset = pybloom.BloomFilter(100000)
 cache = queue.Queue(0)
 stack = queue.LifoQueue(0)
 stack.put(INIT_URL)

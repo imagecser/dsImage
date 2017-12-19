@@ -3,7 +3,7 @@
 
 from bitstring import BitArray
 import math
-import hashf
+import pybloom.hashf as hashf
 
 
 class BloomFilter:
