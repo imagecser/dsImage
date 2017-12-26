@@ -1,10 +1,11 @@
 # dsImage
 dsImage, 2017, NJU CS data struct final project by Zhi Sun.
+
 ## Module
 - dsImage: image bluring and sobel processing.
 - scrawler: download pics from specific website.
   - pybloom: Bloom Filter with basic functions.
-  - ​
+
 ## Requirements
 | Module                                   | Desription                               |
 | ---------------------------------------- | ---------------------------------------- |
@@ -23,8 +24,11 @@ cd ../scrawler
 mkdir file
 python3 mm4.py
 ```
-**Unix**: The program is based on g++5.4.0 x64.
+
 open *dsimage/main.cpp* and modify the directory.
+
+**Unix**: The program is based on g++5.4.0 x64.
+
 ```shell
 cd dsimage
 g++ main.cpp

@@ -10,8 +10,8 @@ import time
 import pybloom
 
 
-count = sum([len(x) for _, _, x in os.walk(os.path.dirname("file/"))])
-MAX_SIZE = 15000
+count = sum([len(x) for _, _, x in os.walk(os.path.dirname("file/"))])  # index of file
+MAX_SIZE = 15000  # stop when the count reaches MAX_SIZE
 INIT_URL = "http://www.mm4000.com/"
 lock_count = threading.Lock()
 pageset = pybloom.BloomFilter(100000)
@@ -33,6 +33,10 @@ start = time.time()
 
 
 def parse_page():
+    """
+    recursively get imgs' urls
+    :return: push imgs' urls to stack
+    """
     global pageset, imgset, lock_count
     while True:
         url = stack.get()
@@ -71,6 +75,10 @@ def parse_page():
 
 
 def save_img():
+    """
+    get img url from stack and parse it
+    :return: save imgs to file/
+    """
     while True:
         global count, lock_count
         [url, src] = cache.get()
@@ -107,3 +115,4 @@ for t in thread_parse:
     t.join()
 for t in thread_save:
     t.join()
+# multiple threadings

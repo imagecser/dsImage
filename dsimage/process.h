@@ -9,11 +9,11 @@
 #include "stb/stb_image_resize.h"
 class PixImage {
 private:
-	int width;
+	int width; 
 	int height;
-	int channel;
-	unsigned char* data;
-
+	int channel; // rgb=3, grayscale=1
+	unsigned char* data; //image information, saved line by line
+	
 	void setPixel(unsigned char* d, const int x, const int y, const int c, const int _width, const int pchannel, const unsigned char pix) {
 		d[y * _width * pchannel + x * pchannel + c] = pix;
 	}
@@ -24,11 +24,11 @@ private:
 
 	unsigned char* create(const int _channel) {
 		return new unsigned char[width * height * _channel];
-	}
+	} // create data by given channel, its width and height.
 
-	unsigned int getPixel(unsigned char* d, const int x, const int y, const int c, int pchannel) {
+	unsigned int getPixel(unsigned char* d, const int x, const int y, const int c, int pchannel) { //get pixel from any data, pchannel means the source's channel
 		return d[y*width*pchannel + x * pchannel + c];
-	}
+	} 
 
 public:
 	PixImage() {};
@@ -54,7 +54,7 @@ public:
 
 	void resize(int _width, int _height) {
 		unsigned char* output = new unsigned char[_width * _height * channel];
-		stbir_resize_uint8(data, width, height, 0, output, _width, _height, 0, 3);
+		stbir_resize_uint8(data, width, height, 0, output, _width, _height, 0, 3); // resize pic by given width and height
 		width = _width;
 		height = _height;
 		stbi_image_free(data);
@@ -64,45 +64,43 @@ public:
 	bool readFile(const char* filename, const int pchannel = 0) {
 		if(data)
 			stbi_image_free(data);
-		data = stbi_load(filename, &width, &height, &channel, pchannel);
+		data = stbi_load(filename, &width, &height, &channel, pchannel); // read pic from file and get its width, height and channel.
 		return data ? true : false;
 	}
 
 	void writeFile(const char* filename) {
-		stbi_write_jpg(filename, width, height, channel, data, 70);
+		stbi_write_jpg(filename, width, height, channel, data, 70); //write pic to file by given width, height and channel. the last para means quality and 70 is enough.
 	}
 
 	void copy(PixImage& src) {
+		if(data)
+			stbi_image_free(data);
 		width = src.width;
 		height = src.height;
 		channel = src.channel;
 		data = create(channel);
 		for(int i = 0; i < width * height * channel; ++i)
 			data[i] = src.data[i];
-	}
+	} // copy and paste from given PixImage.
 
 	unsigned int getPixel(const int x, const int y, const int c) {
 		return data[y*width*channel + x * channel + c];
-	}
+	} // different from the private member, giePixel, the function can only get pixel from its data.
 
 	unsigned int getIndex(const int i) {
 		return data[i];
-	}
+	} // get pixel by its index
 
-	void grayscale();
+	void grayscale(); // convert to grayscale
 
-	void grayChannel();
+	void grayChannel(); // convert grayscale to rgb
 
-	void bluring(int n);
+	void bluring(int n); 
 
-	void sobel();
+	void sobel(); 
 
-	void combineHorizontal(PixImage* src[], int size);
+	void combineHorizontal(PixImage* src[], int size); // horizontal stitching
 
-	void clear() {
-		if(data)
-			stbi_image_free(data);
-	}
 };
 
 void PixImage::bluring(int n) {
