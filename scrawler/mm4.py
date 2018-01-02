@@ -97,7 +97,7 @@ def save_img():
         if count > MAX_SIZE:
             print(time.time() - start)
             return
-        with open("file/" + str(count) + '.jpg', 'wb') as f:
+        with open("../dsimage/file/" + str(count) + '.jpg', 'wb') as f:
             f.write(img)
 
 
