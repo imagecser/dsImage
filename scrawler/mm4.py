@@ -10,7 +10,7 @@ import time
 import pybloom
 
 
-count = sum([len(x) for _, _, x in os.walk(os.path.dirname("file/"))])  # index of file
+count = sum([len(x) for _, _, x in os.walk(os.path.dirname("../dsimage/file/"))])  # index of file
 MAX_SIZE = 15000  # stop when the count reaches MAX_SIZE
 INIT_URL = "http://www.mm4000.com/"
 lock_count = threading.Lock()
