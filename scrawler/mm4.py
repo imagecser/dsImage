@@ -11,7 +11,7 @@ import pybloom
 
 
 count = sum([len(x) for _, _, x in os.walk(os.path.dirname("../dsimage/file/"))])  # index of file
-MAX_SIZE = 15000  # stop when the count reaches MAX_SIZE
+MAX_SIZE = 500  # stop when the count reaches MAX_SIZE
 INIT_URL = "http://www.mm4000.com/"
 lock_count = threading.Lock()
 pageset = pybloom.BloomFilter(100000)
@@ -59,9 +59,6 @@ def parse_page():
             if src not in imgset:
                 cache.put([url, src])
                 imgset.add(src)
-        if count > MAX_SIZE:
-            print(time.time() - start)
-            return
         print("count: " + str(count) + " cache: " + str(cache.qsize()) + " stack: " + str(stack.qsize()))
         for line in soup.find_all('a', href=re.compile("http://www.mm4000.com/.+")):
             href = line.get('href')
@@ -96,7 +93,7 @@ def save_img():
             count = count + 1
         if count > MAX_SIZE:
             print(time.time() - start)
-            return
+            os._exit(0)
         with open("../dsimage/file/" + str(count) + '.jpg', 'wb') as f:
             f.write(img)
 

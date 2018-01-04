@@ -216,5 +216,5 @@ void PixImage::combineHorizontal(PixImage* src[], int size) {
 	stbi_image_free(data);
 	data = output;
 	width = _width;
-	resize(width / 2, height / 2);
+	//resize(width / 2, height / 2);
 }

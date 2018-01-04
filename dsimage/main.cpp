@@ -20,6 +20,6 @@ void process(int start, int step) {
 }
 
 int main() {
-	process(1, 4);
+	process(1, 253);
 	return 0;
 }
