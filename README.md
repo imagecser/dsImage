@@ -21,11 +21,10 @@ git clone https://github.com/imagecser/dsImage
 cd dsimage
 git clone https://github.com/nothings/stb
 cd ../scrawler
-mkdir file
 python3 mm4.py
 ```
 
-open *dsimage/main.cpp* and modify the directory.
+open *dsimage/main.cpp*, modify the directory and the number of picture.
 
 **Unix**: The program is based on g++5.4.0 x64.
 
@@ -35,7 +34,7 @@ g++ main.cpp
 ./a.out
 ```
 **Windows**: 
-open dsimage.sln and build it.
+open dsimage.sln, build and run it.
 
 ## Testcase
 All my testcases lost after a sudden shutdown...

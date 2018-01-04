@@ -11,7 +11,7 @@ import pybloom
 
 
 count = sum([len(x) for _, _, x in os.walk(os.path.dirname("../dsimage/file/"))])  # index of file
-MAX_SIZE = 500  # stop when the count reaches MAX_SIZE
+MAX_SIZE = 10000  # stop when the count reaches MAX_SIZE
 INIT_URL = "http://www.mm4000.com/"
 lock_count = threading.Lock()
 pageset = pybloom.BloomFilter(100000)
